@@ -28,12 +28,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Função para renderizar um lanche no DOM
+    // renderizando meu lanche no DOM
    function renderLanche(lanche) {
+
     const lancheDiv = document.createElement("div");
     lancheDiv.classList.add("flex", "gap-2");
+
+    const imageUrl = lanche.imagem_url 
+        ? `http://127.0.0.1:5000${lanche.imagem_url}` 
+        : 'http://127.0.0.1:5000/uploads/default.png'; // utilizando a imagem padrao, caso não seja selecionada uma imagem
+
     lancheDiv.innerHTML = `
-        <img src="http://127.0.0.1:5000/uploads/${lanche.imagem_url || 'default.png'}" alt="${lanche.nome}" class="w-28 h-28 rounded-md hover:scale-110 hover:-rotate-2 duration-300" />
+        <img src="${imageUrl}" alt="${lanche.nome}" class="w-28 h-28 rounded-md hover:scale-110 hover:-rotate-2 duration-300" />
         <div>
             <p class="font-bold">${lanche.nome}</p>
             <p class="text-sm">${lanche.descricao}</p>
@@ -49,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
     `;
     menu.appendChild(lancheDiv);
 }
+
 
 
 menu.addEventListener("click", function(event) {
@@ -235,7 +242,7 @@ menu.addEventListener("click", function(event) {
     function checkRestauranteOpen() {
         const data = new Date();
         const hora = data.getHours();
-        return hora >= 19 && hora < 22;
+        return hora >= 19 || hora < 6;
     }
 
     const isOpen = checkRestauranteOpen();

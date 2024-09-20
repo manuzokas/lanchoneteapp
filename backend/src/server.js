@@ -1,22 +1,24 @@
+// Carregando as variáveis de ambiente do arquivo .env
 require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-const { Pool } = require('pg');
-const path = require('path');
-const multer = require('multer');
+const { Pool } = require('pg'); // Biblioteca para interagir com o banco de dados
+const path = require('path'); 
+const fileUpload = require('express-fileupload'); // Middleware para lidar com uploads de arquivos
 const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Log das variáveis de ambiente
+// Log das variáveis de ambiente para garantir que foram carregadas corretamente
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_HOST:', process.env.DB_HOST);
 console.log('DB_DATABASE:', process.env.DB_DATABASE);
 console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
 console.log('DB_PORT:', process.env.DB_PORT);
 
-// Configuração do CORS
+// Configurando o CORS: medida de segurança para controlar as origens que podem interagir com sua API
 const corsOptions = {
     origin: 'http://127.0.0.1:5500', // Altere para o domínio que você quer permitir
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -26,24 +28,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Middleware
+// Middleware para JSON
 app.use(express.json());
 
-// Configuração do armazenamento do multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '../../frontend/uploads'); // Caminho relativo correto
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
+// Configuração do express-fileupload para lidar com upload de arquivos
+app.use(fileUpload());
 
-const upload = multer({ storage });
+// Configuração para servir arquivos estáticos da pasta assets
+app.use('/assets', express.static(path.join(__dirname, '../../frontend/assets')));
 
 // Configuração do Pool do PostgreSQL
 const pool = new Pool({
@@ -72,35 +64,66 @@ app.get('/api/lanches', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('Erro ao obter lanches:', err.message);
-        res.status(500).send('Servidor Erro');
+        res.status(500).send('Erro no servidor');
     }
 });
 
 // Rota para adicionar um novo lanche
-app.post('/api/lanches', upload.single('imagem'), async (req, res) => {
+app.post('/api/lanches', async (req, res) => {
     const { nome, descricao, preco, categoria } = req.body;
-    const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-    console.log('Dados recebidos no backend:', { nome, descricao, preco, categoria, imagem_url });
-
-    try {
-        const newLanche = await pool.query(
-            'INSERT INTO lanches (nome, descricao, preco, imagem_url, categoria) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [nome, descricao, preco, imagem_url, categoria]
-        );
-        console.log('Novo lanche adicionado:', newLanche.rows[0]);
-        res.json(newLanche.rows[0]);
-    } catch (err) {
-        console.error('Erro ao adicionar lanche:', err.message);
-        res.status(500).send('Servidor Erro');
+    // verificando se uma imagem foi enviada
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('Nenhum arquivo foi enviado.');
     }
+
+    // acessando o arquivo de imagem enviado
+    const imagem = req.files.imagem;
+
+    // definindo o caminho que as imagens serão salvas
+    const uploadPath = path.join(__dirname, '../../frontend/uploads', imagem.name);
+
+    // Move o arquivo para o diretório de uploads
+    imagem.mv(uploadPath, async (err) => {
+        if (err) {
+            console.error('Erro ao mover arquivo:', err);
+            return res.status(500).send('Erro no servidor.');
+        }
+
+        const imagem_url = `/uploads/${imagem.name}`;
+
+        try {
+            const newLanche = await pool.query(
+                'INSERT INTO lanches (nome, descricao, preco, imagem_url, categoria) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+                [nome, descricao, preco, imagem_url, categoria]
+            );
+            res.json(newLanche.rows[0]);
+        } catch (err) {
+            console.error('Erro ao adicionar lanche:', err.message);
+            res.status(500).send('Erro no servidor.');
+        }
+    });
 });
 
 // Rota para atualizar um lanche
-app.put('/api/lanches/:id', upload.single('imagem'), async (req, res) => {
+app.put('/api/lanches/:id', async (req, res) => {
     const { id } = req.params;
     const { nome, descricao, preco, categoria } = req.body;
-    const imagem_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // Verifica se uma imagem foi enviada
+    let imagem_url = null;
+    if (req.files && req.files.imagem) {
+        const imagem = req.files.imagem;
+        const uploadPath = path.join(__dirname, '../../frontend/uploads', imagem.name);
+
+        imagem.mv(uploadPath, (err) => {
+            if (err) {
+                console.error('Erro ao mover arquivo:', err);
+                return res.status(500).send('Erro no servidor.');
+            }
+        });
+        imagem_url = `/uploads/${imagem.name}`;
+    }
 
     try {
         const updateLanche = await pool.query(
@@ -113,7 +136,7 @@ app.put('/api/lanches/:id', upload.single('imagem'), async (req, res) => {
         res.json(updateLanche.rows[0]);
     } catch (err) {
         console.error('Erro ao atualizar lanche:', err.message);
-        res.status(500).send('Servidor Erro');
+        res.status(500).send('Erro no servidor.');
     }
 });
 
@@ -131,7 +154,7 @@ app.delete('/api/lanches/:id', async (req, res) => {
         res.json(deleteLanche.rows[0]);
     } catch (err) {
         console.error('Erro ao deletar lanche:', err.message);
-        res.status(500).send('Servidor Erro');
+        res.status(500).send('Erro no servidor.');
     }
 });
 
