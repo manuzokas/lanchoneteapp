@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <title>Admin - Gerenciar Lanchonete</title>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Sidebar -->
+    <div class="flex">
+        <aside class="w-64 bg-gray-800 text-white h-screen p-5">
+            <h1 class="text-2xl font-bold">Admin</h1>
+            <nav class="mt-5">
+                <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700" data-section="dashboard">Dashboard</a>
+                <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700" data-section="manage-products">Gerenciar
+                    Produtos</a>
+                <a href="#" class="block py-2 px-4 rounded hover:bg-gray-700" data-section="orders">Pedidos</a>
+            </nav>
+        </aside>
+
+
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <!-- Dashboard Section -->
+            <section id="dashboard">
+                <h2 class="text-3xl font-bold mb-4">Dashboard</h2>
+                <div class="bg-white p-6 rounded shadow-md">
+                    <h3 class="text-xl font-bold mb-2">Resumo</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 bg-blue-100 p-4 rounded shadow-md">
+                            <h4 class="text-lg font-semibold">Total de Pedidos</h4>
+                            <p class="text-2xl">150</p>
+                        </div>
+                        <div class="flex-1 bg-green-100 p-4 rounded shadow-md">
+                            <h4 class="text-lg font-semibold">Produtos em Estoque</h4>
+                            <p class="text-2xl">25</p>
+                        </div>
+                        <div class="flex-1 bg-yellow-100 p-4 rounded shadow-md">
+                            <h4 class="text-lg font-semibold">Receita Total</h4>
+                            <p class="text-2xl">R$ 5000,00</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gerenciar Produtos Section -->
+            <section id="manage-products" class="hidden">
+                <h2 class="text-3xl font-bold mb-4">Gerenciar Produtos</h2>
+                <div class="bg-white p-6 rounded shadow-md">
+                    <h3 class="text-xl font-bold mb-2">Adicionar Novo Produto</h3>
+                    <form id="add-product-form" class="space-y-4">
+                        <div class="mb-4">
+                            <label for="nome" class="block text-sm font-medium text-gray-700">Nome do Produto</label>
+                            <input type="text" id="nome" name="nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                placeholder="Digite o nome do produto..." required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="preco" class="block text-sm font-medium text-gray-700">Preço</label>
+                            <input type="text" id="preco" name="preco" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                placeholder="Digite o preço..." required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="imagem" class="block text-sm font-medium text-gray-700">Imagem</label>
+                            <input type="file" id="imagem" name="imagem" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div class="mb-4">
+                            <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
+                            <textarea id="descricao" name="descricao" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                placeholder="Adicione uma descrição..."></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="categoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+                            <select id="categoria" name="categoria" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <option value="lanches">Lanches</option>
+                                <option value="pasteis">Pasteis</option>
+                                <option value="porcoes">Porções</option>
+                                <option value="a-la-minuta">À la minuta</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Salvar</button>
+                            <button type="button" id="cancel-add-product" class="bg-red-500 text-white px-4 py-2 rounded">Cancelar</button>
+                        </div>
+                    </form>
+
+                    <h3 class="text-xl font-bold mt-6 mb-2">Lista de Produtos</h3>
+                    <div id="product-list">
+                        <!-- Lista de produtos será preenchida aqui pelo JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pedidos Section -->
+            <section id="orders" class="hidden">
+                <h2 class="text-3xl font-bold mb-4">Pedidos</h2>
+                <div class="bg-white p-6 rounded shadow-md">
+                    <h3 class="text-xl font-bold mb-2">Lista de Pedidos</h3>
+                    <div id="order-list">
+                        <!-- Lista de pedidos será preenchida aqui pelo JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin-dashboard.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+</body>
+
+</html>

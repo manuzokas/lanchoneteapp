@@ -1,15 +1,8 @@
 {
-  "name": "misterx",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "npx tailwindcss -i ./styles/style.css -o ./styles/output.css --watch"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "tailwindcss": "^3.4.12"
+    "nodemon": "^3.1.5"
+  },
+  "dependencies": {
+    "multer": "^1.4.5-lts.1"
   }
 }
